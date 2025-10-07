@@ -1,0 +1,13 @@
+# service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-k8s-service
+spec:
+  selector:
+    app: hello-k8s # Match the label from Deployment
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000 # Forward traffic to the container’s port
+  type: LoadBalancer # Use this to expose the service outside the cluster
