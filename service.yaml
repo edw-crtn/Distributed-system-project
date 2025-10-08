@@ -11,16 +11,3 @@ spec:
       port: 80
       targetPort: 5000 # Forward traffic to the container’s port
   type: ClusterIP
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: hello-k8s-service
-spec:
-  selector:
-    app: hello-k8s
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 5000
-
