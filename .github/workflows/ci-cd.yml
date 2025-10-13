@@ -1,0 +1,56 @@
+name: CI/CD Flask + K8s
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test-build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Get code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Config python
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          pip install flask pytest
+
+      # Unit tests
+      - name: Run unit tests
+        run: pytest
+
+      # Build docker image
+      - name: Build Docker image
+        run: |
+          docker build -t hello-k8s:${{ github.sha }} .
+
+      # Push on Docker Hub
+      - name: Push to Docker Hub
+        if: success()
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+          docker tag hello-k8s:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/hello-k8s:${{ github.sha }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/hello-k8s:${{ github.sha }}
+
+      # Deploy to Kubernetes
+      - name: Deploy to Kubernetes
+        if: success()
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.TEST_SERVER_IP }}
+          username: ${{ secrets.TEST_SERVER_USER }}
+          key: ${{ secrets.TEST_SERVER_SSH_KEY }}
+          script: |
+            cd /path/to/your/project
+            git pull
+            kubectl set image deployment/hello-k8s-deployment hello-k8s=${{ secrets.DOCKERHUB_USERNAME }}/hello-k8s:${{ github.sha }}
+            kubectl rollout status deployment/hello-k8s-deployment
