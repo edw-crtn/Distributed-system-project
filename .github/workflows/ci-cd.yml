@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Config python
+      # Python config
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -24,7 +24,7 @@ jobs:
         run: |
           pip install flask pytest
 
-      # Unit tests
+      # Run unit tests
       - name: Run unit tests
         run: pytest
 
@@ -33,15 +33,23 @@ jobs:
         run: |
           docker build -t hello-k8s:${{ github.sha }} .
 
-      # Push on Docker Hub
-      - name: Push to Docker Hub
+      # login to docker
+      - name: Log in to Docker Hub
         if: success()
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-          docker tag hello-k8s:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/hello-k8s:${{ github.sha }}
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/hello-k8s:${{ github.sha }}
 
-      # Deploy to Kubernetes
+      # push to docker
+      - name: Push Docker image to Docker Hub
+        if: success()
+        run: |
+          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/hello-k8s
+          docker tag hello-k8s:${{ github.sha }} $IMAGE_NAME:${{ github.sha }}
+          docker tag hello-k8s:${{ github.sha }} $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:${{ github.sha }}
+          docker push $IMAGE_NAME:latest
+
+      # deploy on kubernettes
       - name: Deploy to Kubernetes
         if: success()
         uses: appleboy/ssh-action@v1.0.3
@@ -53,4 +61,7 @@ jobs:
             cd /path/to/your/project
             git pull
             kubectl set image deployment/hello-k8s-deployment hello-k8s=${{ secrets.DOCKERHUB_USERNAME }}/hello-k8s:${{ github.sha }}
-            kubectl rollout status deployment/hello-k8s-deployment
+            kubectl rollout status deployment/hello-k8s-deployment || (
+              echo "❌ Rollout failed, reverting to previous image..."
+              kubectl rollout undo deployment/hello-k8s-deployment
+            )
