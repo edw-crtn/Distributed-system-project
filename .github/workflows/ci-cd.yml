@@ -62,6 +62,6 @@ jobs:
             git pull
             kubectl set image deployment/hello-k8s-deployment hello-k8s=${{ secrets.DOCKERHUB_USERNAME }}/hello-k8s:${{ github.sha }}
             kubectl rollout status deployment/hello-k8s-deployment || (
-              echo "❌ Rollout failed, reverting to previous image..."
+              echo "Rollout failed, reverting to previous image..."
               kubectl rollout undo deployment/hello-k8s-deployment
             )

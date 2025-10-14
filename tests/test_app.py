@@ -8,7 +8,7 @@ def test_root_route():
     assert response.status_code == 200
     assert b'Hello' in response.data
 
-def test_test_route():  #test
+def test_test_route():  
     client = app.test_client()
     response = client.get('/test')
     assert response.status_code == 200
