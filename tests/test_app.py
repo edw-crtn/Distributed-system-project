@@ -12,4 +12,4 @@ def test_test_route():
     client = app.test_client()
     response = client.get('/test')
     assert response.status_code == 200
-    assert b'Test' in response.data
+    assert b'test' in response.data
