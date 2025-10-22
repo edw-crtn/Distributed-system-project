@@ -44,9 +44,9 @@ def update_deployment(new_image):
 
 def main():
     last_digest = None
-    tag = input("Enter the tag to monitor (e.g. commit SHA or 'latest'): ").strip()
+    tag = 'SHA'
     while True:
-        print("🔎 Checking for updated images...")
+        print("Checking for updated images...")
         remote_digest = get_latest_remote_digest(tag)
         if remote_digest and remote_digest != last_digest:
             print("New image detected!")
