@@ -48,20 +48,3 @@ jobs:
           docker tag hello-k8s:${{ github.sha }} $IMAGE_NAME:latest
           docker push $IMAGE_NAME:${{ github.sha }}
           docker push $IMAGE_NAME:latest
-
-      # deploy on kubernettes
-      - name: Deploy to Kubernetes
-        if: success()
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.TEST_SERVER_IP }}
-          username: ${{ secrets.TEST_SERVER_USER }}
-          key: ${{ secrets.TEST_SERVER_SSH_KEY }}
-          script: |
-            cd /path/to/your/project
-            git pull
-            kubectl set image deployment/hello-k8s-deployment hello-k8s=${{ secrets.DOCKERHUB_USERNAME }}/hello-k8s:${{ github.sha }}
-            kubectl rollout status deployment/hello-k8s-deployment || (
-              echo "Rollout failed, reverting to previous image..."
-              kubectl rollout undo deployment/hello-k8s-deployment
-            )
