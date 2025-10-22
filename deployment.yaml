@@ -1,4 +1,3 @@
-#deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,7 +14,7 @@ spec:
     spec:
       containers:
         - name: hello-k8s
-          image: hello-k8s
-          imagePullPolicy: Never
+          image: edw-crtn/hello-k8s:initial
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000

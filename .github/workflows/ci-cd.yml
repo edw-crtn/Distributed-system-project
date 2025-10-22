@@ -9,42 +9,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Get code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Python config
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
-      # Install dependencies
       - name: Install dependencies
         run: |
           pip install flask pytest
 
-      # Run unit tests
       - name: Run unit tests
         run: pytest
 
-      # Build docker image
       - name: Build Docker image
         run: |
           docker build -t hello-k8s:${{ github.sha }} .
 
-      # login to docker
       - name: Log in to Docker Hub
         if: success()
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      # push to docker
       - name: Push Docker image to Docker Hub
         if: success()
         run: |
           IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/hello-k8s
           docker tag hello-k8s:${{ github.sha }} $IMAGE_NAME:${{ github.sha }}
-          docker tag hello-k8s:${{ github.sha }} $IMAGE_NAME:latest
           docker push $IMAGE_NAME:${{ github.sha }}
-          docker push $IMAGE_NAME:latest
+
+      - name: Save commit SHA for external use
+        run: echo ${{ github.sha }} > last_build_sha.txt

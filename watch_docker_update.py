@@ -1,14 +1,13 @@
 import time
-from kubernetes import client, config
 import subprocess
+from kubernetes import client, config
 
-#  Config
 DEPLOYMENT_NAME = "hello-k8s-deployment"
 CONTAINER_NAME = "hello-k8s"
 NAMESPACE = "default"
-IMAGE_NAME = "edw-crtn/hello-k8s:latest"  #  Docker image
+DOCKER_USER = "edw-crtn"
+IMAGE_BASE = f"{DOCKER_USER}/hello-k8s"
 
-# Load local cluster config
 config.load_kube_config()
 apps_v1 = client.AppsV1Api()
 
@@ -16,9 +15,9 @@ def get_current_image():
     dep = apps_v1.read_namespaced_deployment(DEPLOYMENT_NAME, NAMESPACE)
     return dep.spec.template.spec.containers[0].image
 
-def get_latest_remote_digest():
+def get_remote_digest(tag):
     result = subprocess.run(
-        ["docker", "pull", IMAGE_NAME],
+        ["docker", "pull", f"{IMAGE_BASE}:{tag}"],
         capture_output=True,
         text=True
     )
@@ -27,8 +26,20 @@ def get_latest_remote_digest():
             return line.split("Digest:")[1].strip()
     return None
 
+def get_latest_tag():
+    result = subprocess.run(
+        ["curl", "-s", f"https://hub.docker.com/v2/repositories/{DOCKER_USER}/hello-k8s/tags?page_size=1"],
+        capture_output=True,
+        text=True
+    )
+    import json
+    data = json.loads(result.stdout)
+    if "results" in data and len(data["results"]) > 0:
+        return data["results"][0]["name"]
+    return None
+
 def update_deployment(new_image):
-    print(f" Deployment update to {new_image}")
+    print(f"Deployment update to {new_image}")
     body = {
         "spec": {
             "template": {
@@ -42,17 +53,18 @@ def update_deployment(new_image):
         }
     }
     apps_v1.patch_namespaced_deployment(DEPLOYMENT_NAME, NAMESPACE, body)
-    print("Deployment updated !")
+    print("Deployment updated!")
 
 def main():
-    last_digest = None
+    last_tag = None
     while True:
-        print("Checking updated images")
-        remote_digest = get_latest_remote_digest()
-        if remote_digest and remote_digest != last_digest:
-            print("New image detected !")
-            update_deployment(IMAGE_NAME)
-            last_digest = remote_digest
+        print("Checking for updated images...")
+        latest_tag = get_latest_tag()
+        if latest_tag and latest_tag != last_tag:
+            print(f"New tag detected: {latest_tag}")
+            new_image = f"{IMAGE_BASE}:{latest_tag}"
+            update_deployment(new_image)
+            last_tag = latest_tag
         else:
             print("Nothing new detected")
         time.sleep(60)
