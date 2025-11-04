@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Résultat</title>
+    <style>
+      body { font-family: Arial; text-align:center; margin: 2rem; }
+      .row { display:flex; justify-content:center; gap:2rem; }
+      .card { width:320px; border:1px solid #ddd; padding:1rem; border-radius:8px; }
+      img { width:100%; height:200px; object-fit:cover; }
+      .delta { font-weight:bold; margin-top:0.5rem; }
+      .btn { padding: 0.7rem 1rem; background:#2b7cff; color:white; border:none; border-radius:6px; cursor:pointer; margin-top:1rem;}
+    </style>
+  </head>
+  <body>
+    <h1>Résultat</h1>
+    <div class="row">
+      <div class="card">
+        <h3>{{ winner.name }} (Vainqueur)</h3>
+        <img src="{{ winner.image }}" alt="{{ winner.name }}">
+        <p>Ancien Elo: {{ winner.old_elo }}</p>
+        <p>Nouveau Elo: {{ winner.new_elo }}</p>
+        <p class="delta">Gain: +{{ delta }}</p>
+      </div>
+
+      <div class="card">
+        <h3>{{ loser.name }} (Perdant)</h3>
+        <img src="{{ loser.image }}" alt="{{ loser.name }}">
+        <p>Ancien Elo: {{ loser.old_elo }}</p>
+        <p>Nouveau Elo: {{ loser.new_elo }}</p>
+        <p class="delta">Perte: -{{ delta }}</p>
+      </div>
+    </div>
+
+    <div style="margin-top:2rem;">
+      <a href="/" class="btn">Continuer</a>
+    </div>
+  </body>
+</html>
