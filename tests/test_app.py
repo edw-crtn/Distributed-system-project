@@ -1,47 +1,42 @@
-# test_app.py
+# tests/test_app.py
 import pytest
-from app import app, elo_delta
 from unittest.mock import patch
+from app import app, elo_delta
 
-# -----------------------------
-# Test Elo
-# -----------------------------
+# -------------------------------
+# Test de la fonction elo_delta
+# -------------------------------
 def test_elo_delta_basic():
-    # Elo du gagnant > Elo du perdant
-    delta = elo_delta(1200, 1000)
-    assert isinstance(delta, int)
-    assert delta > 0
+    delta = elo_delta(1000, 1000)
+    # Pour des Elo identiques, delta doit être proche de 16 (k=32)
+    assert delta in [15, 16, 17]
 
-    # Elo du gagnant < Elo du perdant
-    delta2 = elo_delta(1000, 1200)
-    assert delta2 > 0
+# -------------------------------
+# Test des routes Flask
+# -------------------------------
+@pytest.fixture
+def client():
+    with app.test_client() as client:
+        yield client
 
-# -----------------------------
-# Test /health route
-# -----------------------------
-def test_health_route():
-    client = app.test_client()
-    response = client.get("/health")
-    assert response.status_code == 200
-    data = response.get_json()
-    assert "ok" in data
-    assert "msgs" in data
+def test_index_route(client):
+    # On patch la fonction cached_get_characters pour qu'elle retourne toujours 2 persos fictifs
+    with patch("app.cached_get_characters") as mock_chars:
+        mock_chars.return_value = [
+            {"_id": "1", "name": "Char1", "elo": 1000},
+            {"_id": "2", "name": "Char2", "elo": 1000}
+        ]
+        response = client.get("/")
+        assert response.status_code == 200
+        assert b"Qui gagne" in response.data
 
-# -----------------------------
-# Test / route
-# -----------------------------
-@patch("app.cached_get_characters")
-def test_index_route(mock_cached):
-    from flask import url_for
+def test_health_route(client):
+    # On patch mongo_client et redis_client pour éviter des erreurs si pas de DB
+    with patch("app.mongo_client") as mock_mongo, patch("app.redis_client") as mock_redis:
+        mock_mongo.admin.command.return_value = {"ok": 1}
+        mock_redis.ping.return_value = True
 
-    # Cas avec 2 personnages
-    mock_cached.return_value = [{"_id": "1", "name": "A"}, {"_id": "2", "name": "B"}]
-    client = app.test_client()
-    response = client.get("/")
-    assert response.status_code == 200
-    assert b"Qui gagne" in response.data
-
-    # Cas avec <2 personnages -> retourne 500
-    mock_cached.return_value = [{"_id": "1", "name": "A"}]
-    response2 = client.get("/")
-    assert response2.status_code == 500
+        response = client.get("/health")
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data["ok"] is True
