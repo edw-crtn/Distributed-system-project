@@ -1,4 +1,3 @@
-#deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,7 +14,14 @@ spec:
     spec:
       containers:
         - name: hello-k8s
-          image: edw-crtn/hello-k8s:initial
-          imagePullPolicy: IfNotPresent
+          image: hello-k8s:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 5000
+          env:
+            - name: MONGO_URI
+              value: mongodb://mongo-0.mongo,mongo-1.mongo,mongo-2.mongo:27017
+            - name: REDIS_HOST
+              value: redis
+            - name: REDIS_PORT
+              value: "6379"
