@@ -21,7 +21,6 @@ CACHE_TTL = int(os.environ.get("CACHE_TTL", 30))  # en secondes
 # Connexion MongoDB (ReplicaSet)
 # -------------------------------------------------------------
 hosts = ",".join([f"{h}:{MONGO_PORT}" for h in MONGO_HOSTS.split(",")])
-# Inclut le nom de la base dans l'URI
 MONGO_URI = f"mongodb://{hosts}/{MONGO_DB}?replicaSet=rs0"
 
 mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
