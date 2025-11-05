@@ -61,14 +61,14 @@ def invalidate_cache():
     """Supprime le cache pour forcer un refresh des données."""
     redis_client.delete("all_characters")
 
-
+#test
 def elo_delta(winner_elo, loser_elo, k=32):
     """Calcule la variation Elo après un match."""
     expected_win = 1 / (1 + pow(10, (loser_elo - winner_elo) / 400))
     change = int(round(k * (1 - expected_win)))
     return change
 
-# -------------------------------------------------------------
+# -------------------------------------------------------------test
 # Routes Flask
 # -------------------------------------------------------------
 @app.route("/")
