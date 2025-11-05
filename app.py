@@ -12,7 +12,7 @@ from math import pow
 # -------------------------------------------------------------
 MONGO_HOSTS = os.environ.get("MONGO_HOSTS", "mongo-0.mongo-headless,mongo-1.mongo-headless,mongo-2.mongo-headless")
 MONGO_PORT = int(os.environ.get("MONGO_PORT", 27017))
-MONGO_DB = os.environ.get("MONGO_DB", "popdb")  # nom explicite de la base
+MONGO_DB = os.environ.get("MONGO_DB", "popdb")  
 REDIS_HOST = os.environ.get("REDIS_HOST", "redis")
 REDIS_PORT = int(os.environ.get("REDIS_PORT", 6379))
 CACHE_TTL = int(os.environ.get("CACHE_TTL", 30))  # en secondes
