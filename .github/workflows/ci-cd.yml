@@ -19,7 +19,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install flask pytest
+          pip install flask pytest pymongo redis
 
       - name: Run unit tests
         run: pytest
