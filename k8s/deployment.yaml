@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
         - name: hello-k8s
-          image: hello-k8s:latest
-          imagePullPolicy: Alwats
+          image: hello-k8s:dummy
+          imagePullPolicy: Always
           ports:
             - containerPort: 5000
           env:

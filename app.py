@@ -7,7 +7,7 @@ from bson.objectid import ObjectId
 import redis
 from math import pow
 
-# -------------------------------------------------------------
+# -------------------------------------------------------------test
 # Configuration via variables d'environnement
 # -------------------------------------------------------------
 MONGO_HOSTS = os.environ.get("MONGO_HOSTS", "mongo-0.mongo-headless,mongo-1.mongo-headless,mongo-2.mongo-headless")
